@@ -7,7 +7,7 @@ namespace Tetris
 	{
 		protected abstract Position[][] Tiles { get; }
 		protected abstract Position StartOffset { get; }
-		public asbtract int Id { get; }
+		public abstract int Id { get; }
 
 		private int rotationState;
 		private Position offset;
@@ -27,7 +27,7 @@ namespace Tetris
 
 		public void RotateCW()
 		{
-			rotationstate = (rotationState + 1) % Tiles.Length;
+			rotationState = (rotationState + 1) % Tiles.Length;
 		}
 
 		public void RotateCCW()

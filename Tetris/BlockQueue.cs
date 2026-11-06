@@ -27,9 +27,9 @@
             return blocks[random.Next(blocks.Length)]; 
         }
 
-        public BlockQueue GetAndUpdate()
+        public Block GetAndUpdate()
         {
-            BlockQueue block = NextBlock;
+            Block block = NextBlock;
 
             do
             {
