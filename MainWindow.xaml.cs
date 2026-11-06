@@ -90,7 +90,7 @@ namespace Tetris
         {
             foreach (Position p in block.TilePositions())
             {
-                imageControls[p.Row, p.Column].Source = blockImages[block.Id];
+                imageControls[p.Row, p.Column].Source = tileImages[block.Id];
             }
         }
 
