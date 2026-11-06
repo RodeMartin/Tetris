@@ -94,6 +94,13 @@ namespace Tetris
             }
         }
 
+        private void DrawNextBlock(BlockQueue blockQueue)
+        {
+            Block next = blockQueue.NextBlock;
+            NextImage.Source = blockImages[next.Id];
+            DrawNextBlock(gameState.BlockQueue);
+        }
+
         private void Draw(GameState gameState)
         {
             DrawGrid(gameState.GameGrid);
