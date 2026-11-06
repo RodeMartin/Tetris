@@ -42,6 +42,18 @@
           return true;
         }
 
+        public bool IsRowEmpty(int r)
+        {
+            for (int c = 0; c < Columns; c++)
+            {
+                if (grid[r, c] != 0)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private void ClearRow(int r)
         {
             for (int c = 0; c < Columns; c++)
