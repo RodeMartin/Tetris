@@ -23,6 +23,12 @@
                 }
             }   
         }
+        private const int FirstRowIndex = 0;
+        private const int EmptyRowCount = 0;
+        private const int NoHorizontalShift = 0;
+
+        public event Action<List<int>>? RowsCleared;
+        public event Action<Block>? BlockHardDropped;
 
         public GameGrid GameGrid { get; }
         public BlockQueue BlockQueue { get; }
@@ -120,6 +126,23 @@
                 GameGrid[p.Row, p.Column] = CurrentBlock.Id;
             }
 
+            List<int> fullRows = new List<int>();
+            for (int row = FirstRowIndex; row < GameGrid.Rows; row++)
+            {
+                if (GameGrid.IsRowFull(row))
+                {
+                    fullRows.Add(row);
+                }
+            }
+
+            int cleared = GameGrid.ClearFullRows();
+            Score += cleared;
+
+            if (fullRows.Count > EmptyRowCount)
+            {
+                RowsCleared?.Invoke(fullRows);
+            }
+
             Score += GameGrid.ClearFullRows();
 
             if (IsGameOver())
@@ -169,6 +192,8 @@
         public void DropBlock()
         {
             CurrentBlock.Move(BlockDropDistance(), 0);
+            CurrentBlock.Move(BlockDropDistance(), NoHorizontalShift);
+            BlockHardDropped?.Invoke(CurrentBlock);
             PlaceBlock();
         }
     }
