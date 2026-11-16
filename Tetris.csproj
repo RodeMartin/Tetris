@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
@@ -14,5 +15,17 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\Icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="OpenTK" Version="4.8.2" />
+    <PackageReference Include="OpenTK.GLWpfControl" Version="4.3.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Rendering\Shaders\*.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Rendering\Shaders\*.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
