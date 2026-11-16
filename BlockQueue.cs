@@ -1,8 +1,16 @@
-﻿namespace Tetris
+﻿using System;
+using System.Collections.Generic;
+using Tetris.Core;
+
+namespace Tetris
 {
     public class BlockQueue
-        {
-        private readonly Block[] blocks = new Block[]
+    {
+        public const int DefaultPreviewCount = 3;
+        private const double BombSpawnProbability = 0.08;
+        private const int FirstPreviewIndex = 0;
+
+        private readonly Block[] blocks =
         {
             new IBlock(),
             new JBlock(),
@@ -13,31 +21,49 @@
             new ZBlock()
         };
 
+        private readonly List<Block> upcomingBlocks = new List<Block>();
         private readonly Random random = new Random();
-        
-        public Block NextBlock { get; private set; }
+        private readonly bool isBombMode;
+        private readonly int previewCapacity;
 
-        public BlockQueue()
+        public Block NextBlock => upcomingBlocks[FirstPreviewIndex];
+        public IReadOnlyList<Block> UpcomingBlocks => upcomingBlocks;
+
+        public BlockQueue(bool isBombMode = false, int previewCapacity = DefaultPreviewCount)
         {
-            NextBlock = RandomBlock();
+            this.isBombMode = isBombMode;
+            this.previewCapacity = previewCapacity;
+            RefillQueue();
         }
 
-        private Block RandomBlock()
+        private void RefillQueue()
         {
-            return blocks[random.Next(blocks.Length)]; 
+            while (upcomingBlocks.Count < previewCapacity)
+            {
+                Block candidate = GenerateRandomBlock();
+                if (upcomingBlocks.Count == 0 || upcomingBlocks[^1].Id != candidate.Id)
+                {
+                    upcomingBlocks.Add(candidate);
+                }
+            }
+        }
+
+        private Block GenerateRandomBlock()
+        {
+            if (isBombMode && random.NextDouble() < BombSpawnProbability)
+            {
+                return new BombBlock();
+            }
+
+            return blocks[random.Next(blocks.Length)];
         }
 
         public Block GetAndUpdate()
         {
-            Block block = NextBlock;
-
-            do
-            {
-                NextBlock = RandomBlock();
-            } 
-            while (block.Id == NextBlock.Id);
-
-            return block;
+            Block next = upcomingBlocks[FirstPreviewIndex];
+            upcomingBlocks.RemoveAt(FirstPreviewIndex);
+            RefillQueue();
+            return next;
         }
     }
 }

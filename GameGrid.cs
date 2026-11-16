@@ -13,6 +13,24 @@
             set => grid[r, c] = value;
         }
 
+        private const int FirstRowIndex = 0;
+        private const int SingleRowShift = 1;
+
+        public void DeleteRowAndCollapse(int targetRow)
+        {
+            if (targetRow < FirstRowIndex || targetRow >= Rows)
+            {
+                return;
+            }
+
+            ClearRow(targetRow);
+
+            for (int row = targetRow - SingleRowShift; row >= FirstRowIndex; row--)
+            {
+                MoveRowDown(row, SingleRowShift);
+            }
+        }
+
         public GameGrid (int rows, int columns)
         {
             Rows = rows;
