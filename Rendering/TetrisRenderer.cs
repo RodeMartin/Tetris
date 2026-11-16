@@ -30,11 +30,13 @@ namespace Tetris.Rendering
         private const float OpaqueAlpha = 1.0f;
         private const float GhostFlagTrue = 1.0f;
         private const float GhostFlagFalse = 0.0f;
+        private const float BombShakeIntensity = 14.0f;
 
         private const float HardDropShakeIntensity = 3.5f;
         private const float LineClearShakeIntensity = 8.5f;
         private const int HardDropSparkCount = 4;
         private const int LineClearSparkCount = 10;
+        private const int BombSparkCount = 18;
 
         private const string VertexShaderPath = "Rendering/Shaders/standard.vert";
         private const string BackgroundFragmentPath = "Rendering/Shaders/grid_bg.frag";
@@ -46,6 +48,8 @@ namespace Tetris.Rendering
         private const string UniformGridSize = "u_GridSize";
         private const string UniformColor = "u_Color";
         private const string UniformIsGhost = "u_IsGhost";
+        
+        private static readonly Vector4 BombExplosionColor = new Vector4(1.00f, 0.45f, 0.05f, OpaqueAlpha);
 
         private static readonly Vector4[] BlockColors =
         {
@@ -56,7 +60,8 @@ namespace Tetris.Rendering
             new Vector4(1.00f, 0.90f, 0.05f, OpaqueAlpha),       // 4: O - Laser Yellow
             new Vector4(0.10f, 1.00f, 0.35f, OpaqueAlpha),       // 5: S - Acid Green
             new Vector4(0.75f, 0.15f, 1.00f, OpaqueAlpha),       // 6: T - Synth Purple
-            new Vector4(1.00f, 0.12f, 0.30f, OpaqueAlpha)        // 7: Z - Crimson Neon
+            new Vector4(1.00f, 0.12f, 0.30f, OpaqueAlpha),       // 7: Z - Crimson Neon
+            new Vector4(1.00f, 0.82f, 0.15f, OpaqueAlpha)        // 8: Bomb - Solar Gold
         };
 
         private static readonly Vector4 LineClearFlashColor = new Vector4(0.35f, 0.95f, 1.00f, OpaqueAlpha);
@@ -121,6 +126,26 @@ namespace Tetris.Rendering
                 {
                     Vector2 center = GetCellCenter(visibleRow, column);
                     particleSystem.SpawnCellBurst(center, LineClearFlashColor, LineClearSparkCount);
+                }
+            }
+        }
+
+        public void OnBombDetonated(List<int> blastedGridRows)
+        {
+            cameraShake.Trigger(BombShakeIntensity);
+
+            foreach (int gridRow in blastedGridRows)
+            {
+                int visibleRow = gridRow - HiddenTopRows;
+                if (visibleRow < FirstVisibleRowIndex)
+                {
+                    continue;
+                }
+
+                for (int column = FirstColumnIndex; column < VisibleColumns; column++)
+                {
+                    Vector2 center = GetCellCenter(visibleRow, column);
+                    particleSystem.SpawnCellBurst(center, BombExplosionColor, BombSparkCount);
                 }
             }
         }

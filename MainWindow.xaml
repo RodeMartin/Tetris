@@ -7,12 +7,45 @@
         xmlns:glWpfControl="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
         mc:Ignorable="d"
         Title="Tetris — OpenGL Neon Edition"
-        Height="640" Width="820"
-        MinWidth="640" MinHeight="620"
+        Height="740" Width="1060"
+        MinWidth="680" MinHeight="620"
         Foreground="#E6F7FF"
-        FontFamily="Segoe UI" FontSize="22"
+        FontFamily="Segoe UI"
         KeyDown="Window_KeyDown"
         Loaded="Window_Loaded">
+  <Window.Resources>
+    <Storyboard x:Key="BonusRainbowStoryboard">
+      <DoubleAnimation Storyboard.TargetName="BonusBanner"
+                       Storyboard.TargetProperty="Opacity"
+                       From="0.0" To="1.0" Duration="0:0:0.15"/>
+      <DoubleAnimation Storyboard.TargetName="BonusBanner"
+                       Storyboard.TargetProperty="Opacity"
+                       From="1.0" To="0.0" BeginTime="0:0:1.1" Duration="0:0:0.55"/>
+      <DoubleAnimation Storyboard.TargetName="BonusScaleTransform"
+                       Storyboard.TargetProperty="ScaleX"
+                       From="0.82" To="1.06" Duration="0:0:0.25"/>
+      <DoubleAnimation Storyboard.TargetName="BonusScaleTransform"
+                       Storyboard.TargetProperty="ScaleX"
+                       From="1.06" To="1.0" BeginTime="0:0:0.25" Duration="0:0:0.2"/>
+      <DoubleAnimation Storyboard.TargetName="BonusScaleTransform"
+                       Storyboard.TargetProperty="ScaleY"
+                       From="0.82" To="1.06" Duration="0:0:0.25"/>
+      <DoubleAnimation Storyboard.TargetName="BonusScaleTransform"
+                       Storyboard.TargetProperty="ScaleY"
+                       From="1.06" To="1.0" BeginTime="0:0:0.25" Duration="0:0:0.2"/>
+      <ColorAnimationUsingKeyFrames Storyboard.TargetName="BonusGlowShadow"
+                                    Storyboard.TargetProperty="Color"
+                                    Duration="0:0:1.6">
+        <LinearColorKeyFrame Value="#00F0FF" KeyTime="0:0:0.0"/>
+        <LinearColorKeyFrame Value="#1AFF66" KeyTime="0:0:0.3"/>
+        <LinearColorKeyFrame Value="#FFE600" KeyTime="0:0:0.6"/>
+        <LinearColorKeyFrame Value="#FF7700" KeyTime="0:0:0.9"/>
+        <LinearColorKeyFrame Value="#FF2A55" KeyTime="0:0:1.2"/>
+        <LinearColorKeyFrame Value="#BF26FF" KeyTime="0:0:1.6"/>
+      </ColorAnimationUsingKeyFrames>
+    </Storyboard>
+  </Window.Resources>
+
   <Grid>
     <Grid.Background>
       <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0.5,0.5" RadiusX="0.75" RadiusY="0.75">
@@ -21,103 +54,298 @@
       </RadialGradientBrush>
     </Grid.Background>
 
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="*"/>
-    </Grid.RowDefinitions>
+    <Viewbox Stretch="Uniform" Margin="16">
+      <Grid Width="960" Height="680">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="*"/>
-      <ColumnDefinition Width="Auto"/>
-      <ColumnDefinition Width="*"/>
-    </Grid.ColumnDefinitions>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="300"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="300"/>
+        </Grid.ColumnDefinitions>
 
-    <!-- Pontszám kijelző -->
-    <Border Grid.Row="0" Grid.Column="1"
-            Background="#0D111E"
-            BorderBrush="#1F3A52"
-            BorderThickness="1.5"
-            CornerRadius="6"
-            Padding="24,8"
-            Margin="0,16,0,12"
-            HorizontalAlignment="Center">
-      <TextBlock x:Name="ScoreText"
-                 Text="SCORE  0"
-                 FontWeight="SemiBold"
-                 Foreground="#00F0FF"
-                 TextAlignment="Center"/>
-    </Border>
+        <!-- Upper hud: best score, score multiplier -->
+        <StackPanel Grid.Row="0" Grid.Column="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Margin="0,8,0,16">
+          <Border Background="#0D111E"
+                  BorderBrush="#1F3A52"
+                  BorderThickness="1.5"
+                  CornerRadius="6"
+                  Padding="18,8"
+                  Margin="0,0,10,0">
+            <TextBlock x:Name="ScoreText"
+                       Text="SCORE  0"
+                       FontSize="20"
+                       FontWeight="Bold"
+                       Foreground="#00F0FF"/>
+          </Border>
 
-    <!-- Központi OpenGL játéktér -->
-    <Border Grid.Row="1" Grid.Column="1"
-            BorderBrush="#00F0FF"
-            BorderThickness="2"
-            CornerRadius="2"
-            Margin="0,0,0,24"
-            Width="254"
-            Height="504">
-      <Border.Effect>
-        <DropShadowEffect Color="#00F0FF" BlurRadius="18" ShadowDepth="0" Opacity="0.45"/>
-      </Border.Effect>
-      <glWpfControl:GLWpfControl x:Name="OpenGLControl"
-                                 Ready="OpenGLControl_Ready"
-                                 Render="OpenGLControl_Render"/>
-    </Border>
+          <Border Background="#0D111E"
+                  BorderBrush="#1F3A52"
+                  BorderThickness="1.5"
+                  CornerRadius="6"
+                  Padding="14,8"
+                  Margin="0,0,10,0">
+            <TextBlock x:Name="MultiplierText"
+                       Text="1.00x"
+                       FontSize="20"
+                       FontWeight="Bold"
+                       Foreground="#FFB800"/>
+          </Border>
 
-    <!-- Bal panel: Hold -->
-    <StackPanel Grid.Row="1" Grid.Column="0"
-                VerticalAlignment="Center"
-                HorizontalAlignment="Right"
-                Margin="0,0,36,0">
-      <TextBlock Text="HOLD"
-                 FontSize="16"
-                 FontWeight="Bold"
-                 Foreground="#7A8BA8"
-                 TextAlignment="Center"
-                 Margin="0,0,0,8"/>
-      <Border Background="#0A0D18"
-              BorderBrush="#1F3A52"
-              BorderThickness="1.5"
-              CornerRadius="8"
-              Padding="14">
-        <Image x:Name="HoldImage"
-               Width="100"
-               Height="100"/>
-      </Border>
-    </StackPanel>
+          <Border Background="#0D111E"
+                  BorderBrush="#1F3A52"
+                  BorderThickness="1.5"
+                  CornerRadius="6"
+                  Padding="14,8">
+            <TextBlock x:Name="BestScoreText"
+                       Text="BEST  0"
+                       FontSize="20"
+                       FontWeight="SemiBold"
+                       Foreground="#1AFF66"/>
+          </Border>
+        </StackPanel>
 
-    <!-- Jobb panel: Next -->
-    <StackPanel Grid.Row="1" Grid.Column="2"
-                VerticalAlignment="Center"
-                HorizontalAlignment="Left"
-                Margin="36,0,0,0">
-      <TextBlock Text="NEXT"
-                 FontSize="16"
-                 FontWeight="Bold"
-                 Foreground="#7A8BA8"
-                 TextAlignment="Center"
-                 Margin="0,0,0,8"/>
-      <Border Background="#0A0D18"
-              BorderBrush="#1F3A52"
-              BorderThickness="1.5"
-              CornerRadius="8"
-              Padding="14">
-        <Image x:Name="NextImage"
-               Width="100"
-               Height="100"/>
-      </Border>
-    </StackPanel>
+        <!-- Left side menu:  -->
+        <StackPanel Grid.Row="1" Grid.Column="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right"
+                    Margin="0,0,36,0">
+          <TextBlock Text="HOLD"
+                     FontSize="15"
+                     FontWeight="Bold"
+                     Foreground="#7A8BA8"
+                     TextAlignment="Center"
+                     Margin="0,0,0,8"/>
+          <Border Background="#0A0D18"
+                  BorderBrush="#1F3A52"
+                  BorderThickness="1.5"
+                  CornerRadius="8"
+                  Padding="10"
+                  Margin="0,0,0,20">
+            <Image x:Name="HoldImage"
+                   Width="96"
+                   Height="96"/>
+          </Border>
 
-    <!-- Game Over Overlay -->
-    <Grid x:Name="GameOverMenu"
-          Background="#D905070D"
-          Grid.RowSpan="2"
-          Grid.ColumnSpan="3"
-          Visibility="Hidden">
+          <Border Background="#0A0D18"
+                  BorderBrush="#1F3A52"
+                  BorderThickness="1"
+                  CornerRadius="8"
+                  Padding="16,12"
+                  Width="168">
+            <StackPanel>
+              <TextBlock x:Name="ModeBadgeText"
+                         Text="MEDIUM"
+                         FontSize="15"
+                         FontWeight="Bold"
+                         Foreground="#00F0FF"
+                         TextAlignment="Center"/>
+              <TextBlock x:Name="LevelText"
+                         Text="LEVEL: 1"
+                         FontSize="15"
+                         FontWeight="SemiBold"
+                         Foreground="#FFB800"
+                         Margin="0,6,0,0"
+                         TextAlignment="Center"/>
+              <TextBlock x:Name="TimerText"
+                         Text="TIME: ∞"
+                         FontSize="15"
+                         FontWeight="SemiBold"
+                         Foreground="#E6F7FF"
+                         Margin="0,6,0,0"
+                         TextAlignment="Center"/>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <!-- OpenGL + bonuses + anti-cheat system -->
+        <Grid Grid.Row="1" Grid.Column="1"
+              Width="264"
+              Height="524"
+              Margin="0,0,0,16">
+          <Border BorderBrush="#00F0FF"
+                  BorderThickness="2"
+                  CornerRadius="2">
+            <Border.Effect>
+              <DropShadowEffect Color="#00F0FF" BlurRadius="20" ShadowDepth="0" Opacity="0.45"/>
+            </Border.Effect>
+            <glWpfControl:GLWpfControl x:Name="OpenGLControl"
+                                       Ready="OpenGLControl_Ready"
+                                       Render="OpenGLControl_Render"/>
+          </Border>
+
+          <!-- Rainbow Glow -->
+          <StackPanel x:Name="BonusBanner"
+                      Opacity="0"
+                      IsHitTestVisible="False"
+                      VerticalAlignment="Top"
+                      HorizontalAlignment="Center"
+                      Margin="0,42,0,0"
+                      RenderTransformOrigin="0.5,0.5">
+            <StackPanel.RenderTransform>
+              <ScaleTransform x:Name="BonusScaleTransform" ScaleX="1" ScaleY="1"/>
+            </StackPanel.RenderTransform>
+            <StackPanel.Effect>
+              <DropShadowEffect x:Name="BonusGlowShadow"
+                                Color="#00F0FF"
+                                BlurRadius="18"
+                                ShadowDepth="0"
+                                Opacity="0.95"/>
+            </StackPanel.Effect>
+            <TextBlock x:Name="BonusTitleText"
+                       Text="TETRIS! +800"
+                       FontSize="24"
+                       FontWeight="Black"
+                       TextAlignment="Center">
+              <TextBlock.Foreground>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                  <GradientStop Color="#00F0FF" Offset="0.0"/>
+                  <GradientStop Color="#1AFF66" Offset="0.25"/>
+                  <GradientStop Color="#FFE600" Offset="0.5"/>
+                  <GradientStop Color="#FF7700" Offset="0.75"/>
+                  <GradientStop Color="#FF2A55" Offset="1.0"/>
+                </LinearGradientBrush>
+              </TextBlock.Foreground>
+            </TextBlock>
+            <TextBlock x:Name="BonusSubtitleText"
+                       Text="COMBO STREAK x2"
+                       FontSize="13"
+                       FontWeight="Bold"
+                       Foreground="#FFFFFF"
+                       TextAlignment="Center"
+                       Margin="0,2,0,0"/>
+          </StackPanel>
+
+          <!-- Anti-Cheat Pause (P) -->
+          <Border x:Name="PauseOverlay"
+                  Background="#F2070A14"
+                  Visibility="Hidden">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+              <TextBlock Text="PAUSED"
+                         FontSize="34"
+                         FontWeight="Bold"
+                         Foreground="#00F0FF"
+                         TextAlignment="Center"/>
+              <TextBlock Text="PRESS P TO RESUME"
+                         FontSize="13"
+                         FontWeight="SemiBold"
+                         Foreground="#7A8BA8"
+                         Margin="0,8,0,0"
+                         TextAlignment="Center"/>
+            </StackPanel>
+          </Border>
+        </Grid>
+
+        <!-- Right Panel hotkeys -->
+        <StackPanel Grid.Row="1" Grid.Column="2"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    Margin="36,0,0,0">
+          <TextBlock Text="NEXT"
+                     FontSize="15"
+                     FontWeight="Bold"
+                     Foreground="#7A8BA8"
+                     TextAlignment="Center"
+                     Margin="0,0,0,8"/>
+          <Border Background="#0A0D18"
+                  BorderBrush="#1F3A52"
+                  BorderThickness="1.5"
+                  CornerRadius="8"
+                  Padding="10"
+                  Margin="0,0,0,18">
+            <ItemsControl x:Name="NextQueueList">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Image Source="{Binding}"
+                         Width="72"
+                         Height="72"
+                         Margin="0,2"/>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </Border>
+
+          <TextBlock x:Name="AudioStatusText"
+                     Text="AUDIO: ON (M)"
+                     FontSize="13"
+                     FontWeight="SemiBold"
+                     Foreground="#00F0FF"
+                     Margin="0,0,0,4"
+                     TextAlignment="Center"/>
+
+          <TextBlock Text="P: PAUSE  •  F11: FULLSCREEN&#x0a;ESC: MODE MENU"
+                     FontSize="12"
+                     Foreground="#5C6E8C"
+                     LineHeight="18"
+                     TextAlignment="Center"/>
+        </StackPanel>
+      </Grid>
+    </Viewbox>
+
+    <!-- Game Mode Menu -->
+    <Grid x:Name="ModeMenuOverlay"
+          Background="#E605070D">
       <Border Background="#0E1324"
               BorderBrush="#00F0FF"
               BorderThickness="2"
-              CornerRadius="10"
+              CornerRadius="12"
+              Padding="44,36"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center">
+        <StackPanel Width="340">
+          <TextBlock Text="TETRIS"
+                     FontSize="36"
+                     FontWeight="Bold"
+                     Foreground="#00F0FF"
+                     TextAlignment="Center"/>
+          <TextBlock Text="SELECT GAME MODE"
+                     FontSize="14"
+                     FontWeight="Bold"
+                     Foreground="#7A8BA8"
+                     Margin="0,4,0,24"
+                     TextAlignment="Center"/>
+
+          <Button Content="EASY  (0.8x SCORE)" Tag="Easy" Click="SelectMode_Click"
+                  Background="#131B33" Foreground="#E6F7FF" BorderBrush="#1F3A52"
+                  FontSize="16" FontWeight="SemiBold" Padding="12" Margin="0,0,0,10" Cursor="Hand"/>
+
+          <Button Content="MEDIUM  (1.0x SCORE)" Tag="Medium" Click="SelectMode_Click"
+                  Background="#131B33" Foreground="#E6F7FF" BorderBrush="#00F0FF"
+                  FontSize="16" FontWeight="SemiBold" Padding="12" Margin="0,0,0,10" Cursor="Hand"/>
+
+          <Button Content="HARD  (1.5x SCORE)" Tag="Hard" Click="SelectMode_Click"
+                  Background="#131B33" Foreground="#FF2A55" BorderBrush="#FF2A55"
+                  FontSize="16" FontWeight="SemiBold" Padding="12" Margin="0,0,0,10" Cursor="Hand"/>
+
+          <Button Content="TIME ATTACK  (2 MIN)" Tag="TimeAttack" Click="SelectMode_Click"
+                  Background="#131B33" Foreground="#FFB800" BorderBrush="#FFB800"
+                  FontSize="16" FontWeight="SemiBold" Padding="12" Margin="0,0,0,10" Cursor="Hand"/>
+
+          <Button Content="INFINITE  (ENDLESS)" Tag="Infinite" Click="SelectMode_Click"
+                  Background="#131B33" Foreground="#1AFF66" BorderBrush="#1AFF66"
+                  FontSize="16" FontWeight="SemiBold" Padding="12" Margin="0,0,0,10" Cursor="Hand"/>
+
+          <Button Content="BOMB MODE  (EXPLOSIVE)" Tag="BombMode" Click="SelectMode_Click"
+                  Background="#131B33" Foreground="#FF7700" BorderBrush="#FF7700"
+                  FontSize="16" FontWeight="SemiBold" Padding="12" Cursor="Hand"/>
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- Game Over Overlay -->
+    <Grid x:Name="GameOverMenu"
+          Background="#E605070D"
+          Visibility="Hidden">
+      <Border Background="#0E1324"
+              BorderBrush="#FF2A55"
+              BorderThickness="2"
+              CornerRadius="12"
               Padding="44,32"
               HorizontalAlignment="Center"
               VerticalAlignment="Center">
@@ -126,6 +354,14 @@
                      FontSize="42"
                      FontWeight="Bold"
                      Foreground="#FF2A55"
+                     TextAlignment="Center"/>
+          <TextBlock x:Name="NewRecordBadge"
+                     Text="★ NEW HIGH SCORE ★"
+                     FontSize="16"
+                     FontWeight="Bold"
+                     Foreground="#1AFF66"
+                     Margin="0,6,0,0"
+                     Visibility="Collapsed"
                      TextAlignment="Center"/>
           <TextBlock x:Name="FinalScoreText"
                      Text="SCORE  0"
@@ -140,8 +376,18 @@
                   Foreground="#050811"
                   BorderThickness="0"
                   Padding="28,12"
+                  Margin="0,0,0,10"
                   Cursor="Hand"
                   Click="PlayAgain_Click"/>
+          <Button Content="CHANGE MODE"
+                  FontSize="15"
+                  FontWeight="SemiBold"
+                  Background="#131B33"
+                  Foreground="#E6F7FF"
+                  BorderBrush="#1F3A52"
+                  Padding="20,10"
+                  Cursor="Hand"
+                  Click="OpenModeMenu_Click"/>
         </StackPanel>
       </Border>
     </Grid>
