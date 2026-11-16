@@ -16,7 +16,7 @@ A modern, hardware-accelerated implementation of Tetris built with **C#**, **.NE
 
 | Mode Selection & Responsive HUD | Bomb Detonation & Rainbow Combo Banner |
 | :---: | :---: |
-| <img alt="gamemode-selectionv3" src="https://github.com/user-attachments/assets/b6ac7e82-c26e-4862-b7fc-20b9b2f04e95" /> | <img alt="finalreadmefile" src="Tetris/Assets/finalreadmefile.gif" /> |
+| <img alt="gamemode-selectionv3" src="https://github.com/user-attachments/assets/b6ac7e82-c26e-4862-b7fc-20b9b2f04e95" /> | <img alt="finalreadmefile" src="https://github.com/RodeMartin/Tetris/blob/main/Assets/finalreadmefile.gif?raw=true" /> |
 
 ---
 
